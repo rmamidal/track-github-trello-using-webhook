@@ -5,8 +5,8 @@ const engines = require('consolidate');
 const request  = require('request');
 
 //trello credentials.
-const key = "9a6e85bc9f803b92b1b0211a7a99778b";
-const token = "022a033fb4e49469f76462183dce0706c0000b6ec41f69af731e70063194dbd2";
+const apiKey = "9a6e85bc9f803b92b1b0211a7a99778b";
+const apiToken = "022a033fb4e49469f76462183dce0706c0000b6ec41f69af731e70063194dbd2";
 
 const firebaseApp = firebase.initializeApp(
     functions.config().firebase
@@ -39,7 +39,7 @@ app.get("/webhooks", (req, res, next) => {
             {
                 method: 'PUT',
                 uri: path,
-                body: {value: 'I am able get the id of the board and Card'},
+                body: {value: 'I am able get the id of the board and Card...'},
                 json: true 
             },
             function (error, response, body) {
@@ -53,25 +53,59 @@ app.get("/webhooks", (req, res, next) => {
     res.send("OK");
 });
 
+//Code to register webhooks.
+app.get("/registerWebhook", (req, res, next) => {
+   // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
+    var path = 'https://api.trello.com/1/token/'+ apiToken+'/webhooks/?key='+apiKey;
+            request.post('https://api.trello.com/1/webhooks', {
+                body: {
+                  description: 'Trello Webhook Server',
+                  callbackURL: 'https://gitbub-trello-webhook.firebaseapp.com/trelloUser',
+                  idModel: "59edd17a48fa712db6465109",
+                  key: apiKey,
+                  token: apiToken
+                },
+                json: true
+              }, (err, res, body) => {
+                if (err) {
+                  reject(err);
+                } else if (typeof body === 'string') {
+                  if (body === 'A webhook with that callback, model, and token already exists') {
+                    console.log(body);
+                  } else {
+                    console.log('Body ID: '+body);
+                  }
+                } else {
+                  this.webhookID = body.id;
+                  console.log('Webhook ID: '+body.id);
+                }
+              });
+    res.send(path);
+});
 
 //Code to get user activity on board.
 app.get("/trelloUser", (req, res, next) => {
     res.set('Cache-Control','public, max-age=300, s-max-age=600');
-    var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
-    var output= request(
-            {
-                method: 'GET',
-                uri: path,
-                json: true 
-            },
+   // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
+    var path = 'https://api.trello.com/1/token/'+ token+'/webhooks/?key='+key;
+    request(
+        {
+            method: 'GET',
+            uri: path,
+            description: 'Trello Webhook Server2',
+            callbackURL: 'https://gitbub-trello-webhook.firebaseapp.com/trelloUserWebhooks',
+            idModel: '59b8f61fbab15b32ae120fbe',
+            json: true 
+        },
             function (error, response, body) {
                 if(response.statusCode == 200){
+                    console.log("Success");
                     console.log(body);
                 } else {
                     console.log('error: '+ response.statusCode);
                     console.log(body);
                 }
             });
-    res.send(output);
+    res.send(path);
 });
 exports.app = functions.https.onRequest(app);
