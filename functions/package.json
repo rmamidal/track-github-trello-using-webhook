@@ -3,6 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "dependencies": {
     "consolidate": "^0.14.5",
+    "create-trello-webhook": "^1.0.1",
     "express": "^4.16.2",
     "firebase-admin": "~5.4.0",
     "firebase-functions": "^0.7.0",
