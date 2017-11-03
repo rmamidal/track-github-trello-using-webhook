@@ -3,6 +3,28 @@ const firebase = require('firebase-admin');
 const express = require("express");
 const engines = require('consolidate');
 const request  = require('request');
+require('dotenv').config()
+const TrelloWebhookServer = require('./src/webhook-server');
+const trelloWHServer = new TrelloWebhookServer({
+    port: "3200",
+    hostURL: "https://gitbub-trello-webhook.firebaseapp.com",
+    apiKey: "9a6e85bc9f803b92b1b0211a7a99778b",
+    apiToken: "022a033fb4e49469f76462183dce0706c0000b6ec41f69af731e70063194dbd2",
+    clientSecret: "c937d4ba4d554af6fb99fcf3ecfeb8de7f3a57883503b80e2f7aa0785087ed76"
+  });
+  trelloWHServer.start('59edd17a48fa712db6465109')
+  .then(webhookID => {
+    console.log(`Webhook ID: ${webhookID}`);
+
+    trelloWHServer.on('data', event => {
+      console.log('Got stuff from Trello!');
+    });
+  })
+  .catch(e => {
+    console.log('Error getting Trello webhook');
+    console.log(e);
+  });
+
 
 //trello credentials.
 const apiKey = "9a6e85bc9f803b92b1b0211a7a99778b";
@@ -34,7 +56,7 @@ app.get("/", (req, res) => {
 //Code to update the user card
 app.get("/webhooks", (req, res, next) => {
     res.set('Cache-Control','public, max-age=300, s-max-age=600');
-    var path = 'https://api.trello.com/1/cards/59edd193c57ab29600697743/name?key=' + key + '&token=' + token;
+    var path = 'https://api.trello.com/1/cards/59edd193c57ab29600697743/name?key=' + apiKey + '&token=' + apiToken;
      request(
             {
                 method: 'PUT',
@@ -84,28 +106,13 @@ app.get("/registerWebhook", (req, res, next) => {
 });
 
 //Code to get user activity on board.
-app.get("/trelloUser", (req, res, next) => {
-    res.set('Cache-Control','public, max-age=300, s-max-age=600');
-   // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
-    var path = 'https://api.trello.com/1/token/'+ token+'/webhooks/?key='+key;
-    request(
-        {
-            method: 'GET',
-            uri: path,
-            description: 'Trello Webhook Server2',
-            callbackURL: 'https://gitbub-trello-webhook.firebaseapp.com/trelloUserWebhooks',
-            idModel: '59b8f61fbab15b32ae120fbe',
-            json: true 
-        },
-            function (error, response, body) {
-                if(response.statusCode == 200){
-                    console.log("Success");
-                    console.log(body);
-                } else {
-                    console.log('error: '+ response.statusCode);
-                    console.log(body);
-                }
-            });
-    res.send(path);
+app.get("/trelloUserWebhook", (req, res, next) => {
+    //res.set('Cache-Control','public, max-age=300, s-max-age=600');
+   // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + apiKey + '&apiToken=' + apiToken;
+  // var dept = req.body;
+  // res.json(`Departments Added : ${req.body} `)
+  // console.log(dept);
+   res.send(req.body);
+    
 });
 exports.app = functions.https.onRequest(app);
