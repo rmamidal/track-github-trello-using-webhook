@@ -7,7 +7,7 @@ require('dotenv').config()
 const TrelloWebhookServer = require('./src/webhook-server');
 const trelloWHServer = new TrelloWebhookServer({
     port: "3200",
-    hostURL: "https://gitbub-trello-webhook.firebaseapp.com",
+    hostURL: "https://aie-onboarding.firebaseapp.com",
     apiKey: "9a6e85bc9f803b92b1b0211a7a99778b",
     apiToken: "022a033fb4e49469f76462183dce0706c0000b6ec41f69af731e70063194dbd2",
     clientSecret: "c937d4ba4d554af6fb99fcf3ecfeb8de7f3a57883503b80e2f7aa0785087ed76"
@@ -54,7 +54,7 @@ app.get("/", (req, res) => {
 });
 
 //Code to update the user card
-app.get("/webhooks", (req, res, next) => {
+app.get("/webhooks/", (req, res, next) => {
     res.set('Cache-Control','public, max-age=300, s-max-age=600');
     var path = 'https://api.trello.com/1/cards/59edd193c57ab29600697743/name?key=' + apiKey + '&token=' + apiToken;
      request(
@@ -76,13 +76,13 @@ app.get("/webhooks", (req, res, next) => {
 });
 
 //Code to register webhooks.
-app.get("/registerWebhook", (req, res, next) => {
+app.get("/registerWebhook/", (req, res, next) => {
    // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
     var path = 'https://api.trello.com/1/token/'+ apiToken+'/webhooks/?key='+apiKey;
             request.post('https://api.trello.com/1/webhooks', {
                 body: {
                   description: 'Trello Webhook Server',
-                  callbackURL: 'https://gitbub-trello-webhook.firebaseapp.com/trelloUser',
+                  callbackURL: 'https://aie-onboarding.firebaseapp.com/trelloUser',
                   idModel: "59edd17a48fa712db6465109",
                   key: apiKey,
                   token: apiToken
@@ -106,7 +106,7 @@ app.get("/registerWebhook", (req, res, next) => {
 });
 
 //Code to get user activity on board.
-app.get("/trelloUserWebhook", (req, res, next) => {
+app.get("/trelloUserWebhook/", (req, res, next) => {
     //res.set('Cache-Control','public, max-age=300, s-max-age=600');
    // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + apiKey + '&apiToken=' + apiToken;
   // var dept = req.body;
@@ -114,5 +114,6 @@ app.get("/trelloUserWebhook", (req, res, next) => {
   // console.log(dept);
    res.send(req.body);
     
-});
+}); 
+
 exports.app = functions.https.onRequest(app);

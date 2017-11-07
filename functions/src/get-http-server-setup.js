@@ -12,7 +12,7 @@ module.exports = function getHTTPServerSetup(tws, handlers) {
     if (path.substr(0, -1) !== '/') {
       path += '/';
     }
-    that.config.callbackURL = `${path}trelloUserWebhook`;
+    that.config.callbackURL = `${path}trelloUserWebhook/`;
     path = that.config.callbackURL.match(/https?:\/\/[^\/]+(\/.*)/)[1];
 
     const httpHandler = getHTTPHandler(tws, handlers);

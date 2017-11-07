@@ -12,7 +12,7 @@ class WebhookRegistrar {
   register(callbackURL, modelID) {
     return new Promise((resolve, reject) => {
       if (!this.webhookID) {
-        request.post('https://api.trello.com/1/webhooks', {
+        request.post('https://api.trello.com/1/webhooks/', {
           body: {
             description: 'Trello Webhook Server',
             callbackURL,
