@@ -5,6 +5,8 @@ const engines = require('consolidate');
 const request  = require('request');
 require('dotenv').config()
 const TrelloWebhookServer = require('./src/webhook-server');
+var output=[];
+
 const trelloWHServer = new TrelloWebhookServer({
     port: "3200",
     hostURL: "https://aie-onboarding.firebaseapp.com",
@@ -54,7 +56,7 @@ app.get("/", (req, res) => {
 });
 
 //Code to update the user card
-app.get("/webhooks/", (req, res, next) => {
+app.get("/webhooks", (req, res, next) => {
     res.set('Cache-Control','public, max-age=300, s-max-age=600');
     var path = 'https://api.trello.com/1/cards/59edd193c57ab29600697743/name?key=' + apiKey + '&token=' + apiToken;
      request(
@@ -76,13 +78,13 @@ app.get("/webhooks/", (req, res, next) => {
 });
 
 //Code to register webhooks.
-app.get("/registerWebhook/", (req, res, next) => {
+app.get("/registerWebhook", (req, res, next) => {
    // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + key + '&token=' + token;
     var path = 'https://api.trello.com/1/token/'+ apiToken+'/webhooks/?key='+apiKey;
             request.post('https://api.trello.com/1/webhooks', {
                 body: {
                   description: 'Trello Webhook Server',
-                  callbackURL: 'https://aie-onboarding.firebaseapp.com/trelloUser',
+                  callbackURL: 'https://gitbub-trello-webhook.firebaseapp.com/trelloUser',
                   idModel: "59edd17a48fa712db6465109",
                   key: apiKey,
                   token: apiToken
@@ -105,15 +107,14 @@ app.get("/registerWebhook/", (req, res, next) => {
     res.send(path);
 });
 
-//Code to get user activity on board.
-app.get("/trelloUserWebhook/", (req, res, next) => {
-    //res.set('Cache-Control','public, max-age=300, s-max-age=600');
-   // var path = 'https://api.trello.com/1/members/59b8f61fbab15b32ae120fbe/actions?key=' + apiKey + '&apiToken=' + apiToken;
-  // var dept = req.body;
-  // res.json(`Departments Added : ${req.body} `)
-  // console.log(dept);
-   res.send(req.body);
-    
+//Http Post request of trello webhook.
+app.post("/trelloUserWebhook/", (req, res, next) => {
+  console.log(req.body);
+  output.push(req.body);
 }); 
 
+//Http get request of trello webhook.
+app.get("/trelloUserWebhookoutput", (req, res, next) => {
+  res.send(output);
+}); 
 exports.app = functions.https.onRequest(app);
